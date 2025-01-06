@@ -29,15 +29,19 @@ def main():
 
     try:
         competitors = [
-            Competitor(name="teltonika", url= "https://teltonika-iot-group.com")
+            Competitor(name="teltonika", url= "https://teltonika-iot-group.com"),
+            Competitor(name="revolut", url= "https://www.revolut.com/en-LT/news/")
         ]
+
+        geminiModel = initGeminiModel()
+        
         # Open the target website
         for competitor in competitors:
             driver.get(competitor.url)
 
             # captureWebScreen(driver, competitor)
             competitorData = scrapeText(driver)
-            foramttedompetitorData = initTextModel(competitorData)
+            foramttedompetitorData = getGeminiQuery(model = geminiModel, competitorData = competitorData)
             writeToCSV(competitor.name, foramttedompetitorData)
 
 
@@ -111,12 +115,22 @@ def writeToCSV(competitorName, competitorData):
         csvfile.close()
 
 
-def initTextModel(competitorData: str):
+def initGeminiModel():
     genai.configure(api_key="AIzaSyCKhoUdsFUWxA0UrjTzMgE7ALbQQakSC1g")
-    model = genai.GenerativeModel("gemini-1.5-flash")
-    response = model.generate_content(f'Details about company are provided in quatation marks. The text is not clean. Clean the text and make a summary from the provided text. "{competitorData}"')
+    return genai.GenerativeModel("gemini-1.5-flash")
+    
+def getGeminiQuery(model: genai.GenerativeModel, competitorData: str):
+
+    query = (
+    f'Details about company are provided in quatation marks. The text is not clean. Clean the text and make a summary from the provided text.' 
+    f'If there are any news about the company, list them with exact headlines or if they dont have headlines summarize the news into headline making a list of them.'
+    f'"{competitorData}"'
+    )
+
+    response = model.generate_content(query)
     print(response.text)
     return response.text
+    
 
 main()
 
