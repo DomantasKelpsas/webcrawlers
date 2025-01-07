@@ -2,12 +2,14 @@ from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from bs4 import BeautifulSoup
 from dataclasses import dataclass
 import datetime
+import time
 import csv
-from PIL import Image
 import google.generativeai as genai
+import base64
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 
 @dataclass
 class Competitor:
@@ -30,7 +32,7 @@ def main():
     try:
         competitors = [
             Competitor(name="teltonika", url= "https://teltonika-iot-group.com"),
-            Competitor(name="revolut", url= "https://www.revolut.com/en-LT/news/")
+            # Competitor(name="revolut", url= "https://www.revolut.com/en-LT/news/")
         ]
 
         geminiModel = initGeminiModel()
@@ -39,62 +41,22 @@ def main():
         for competitor in competitors:
             driver.get(competitor.url)
 
-            # captureWebScreen(driver, competitor)
-            competitorData = scrapeText(driver)
-            foramttedompetitorData = getGeminiQuery(model = geminiModel, competitorData = competitorData)
-            writeToCSV(competitor.name, foramttedompetitorData)
+            save_webpage_as_pdf(driver, competitor)
+            # captureWebScreen2(driver, competitor)
+            # competitorData = scrapeText(driver)
+            # foramttedompetitorData = getGeminiQuery(model = geminiModel, competitorData = competitorData)
+            # writeToCSV(competitor.name, foramttedompetitorData)
 
 
     finally:
         # Close the browser
         driver.quit()
 
-def captureWebScreen(driver: webdriver, competitor: Competitor):
-    # Set the window size to the total height of the page
-    total_height = driver.execute_script("return document.body.scrollHeight")
-    driver.set_window_size(1920, total_height)
-    currentDate = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-
-    # Take a screenshot of the full page
-    screenshot_path = f"E:\\Users\\Echo\\Documents\\Python\\Competitors\\screenshots\\{competitor.name}_screenshot_{currentDate}.png"
-    driver.save_screenshot(screenshot_path)
-    print(f"Screenshot saved at {screenshot_path}")
-
 def scrapeText(driver: webdriver):
     pageText = driver.find_element("tag name", "body").text.replace('\n', ' ').replace('\r', ' ')
     print(pageText)
 
     return pageText
-
-def captureWebScreen2(driver: webdriver, competitor: Competitor):
-    viewport_height = driver.execute_script("return window.innerHeight")
-    scroll_height = driver.execute_script("return document.body.scrollHeight")
-    driver.set_window_size(1920, viewport_height)
-
-    # Take screenshots while scrolling
-    screenshots = []
-    for offset in range(0, scroll_height, viewport_height):
-        driver.execute_script(f"window.scrollTo(0, {offset})")
-        screenshot_path = f"screenshot_{offset}.png"
-        driver.save_screenshot(screenshot_path)
-        screenshots.append(screenshot_path)
-
-    # Stitch screenshots together
-    images = [Image.open(s) for s in screenshots]
-    total_height = sum(img.height for img in images)
-    stitched_image = Image.new("RGB", (images[0].width, total_height))
-
-    y_offset = 0
-    for img in images:
-        stitched_image.paste(img, (0, y_offset))
-        y_offset += img.height
-
-    currentDate = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-
-    # Take a screenshot of the full page
-    screenshot_path = f"E:\\Users\\Echo\\Documents\\Python\\screenshots\\{competitor.name}_screenshot_{currentDate}.png"
-    print(f"Screenshot saved at {screenshot_path}")
-    stitched_image.save(screenshot_path)
 
 def writeToCSV(competitorName, competitorData):
     csvfile = None  
@@ -130,6 +92,63 @@ def getGeminiQuery(model: genai.GenerativeModel, competitorData: str):
     response = model.generate_content(query)
     print(response.text)
     return response.text
+
+def save_webpage_as_pdf(driver: webdriver.Chrome,  competitor: Competitor):
+
+    try:
+        # Wait for the page to load (optional, adjust as needed)
+
+        currentDate = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
+        pdf_path = f"E:\\Users\\Echo\\Documents\\Python\\Competitors\\screenshots\\{competitor.name}_screenshot_{currentDate}.pdf"
+
+        # Wait for the page to load completely
+        # WebDriverWait(driver, 20).until(
+        #     EC.presence_of_element_located((By.TAG_NAME, "body"))
+        # )
+        WebDriverWait(driver, 20).until(
+            lambda d: d.execute_script("return document.readyState") == "complete"
+         )
+
+       # Handle cookies popup
+        maxCookiesButtonReries = 3
+        cookiesButtonReries = 0
+
+        cookiesButtonRule = [
+                "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
+                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]",
+                "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
+                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]",
+                "//div[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
+                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]"
+                ]
+        
+        while cookiesButtonReries < maxCookiesButtonReries:
+            try:
+                cookies_button = WebDriverWait(driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, cookiesButtonRule[cookiesButtonReries]))
+                )
+                cookies_button.click()
+                time.sleep(1)
+                break
+            except Exception as e:
+                cookiesButtonReries += 1
+                print(f"Attempt {cookiesButtonReries}: Cookies button not found. Retrying... ({str(e)})")
+
+        # Scroll the page to ensure full rendering
+        driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+        pdf_base64 = driver.print_page()
+
+        # Decode the Base64 content into binary data
+        pdf_binary = base64.b64decode(pdf_base64)
+
+        # Save the binary data to a PDF file
+        with open(pdf_path, 'wb') as f:
+            f.write(pdf_binary)
+
+        print(f"Saved webpage to PDF: {pdf_path}")
+    except Exception as e:
+        print(e)
     
 
 main()
