@@ -1,11 +1,12 @@
 import csv
+import Arguments
 
 class CsvHandler:
     def writeToCSV(competitorName: str, competitorData: str):
         csvfile = None  
 
         try:
-            csvfile = open("E:\\Users\\Echo\\Documents\\Python\\Competitors\\competitors.csv", 'a',newline='')
+            csvfile = open(Arguments.PATH_CSV, 'a',newline='')
             
             with csvfile:
                 fieldnames = ['Company', 'Details']

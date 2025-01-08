@@ -6,6 +6,7 @@ import base64
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from Competitor import Competitor
+import Arguments
 
 class PdfHandler: 
     def save_webpage_as_pdf(driver: webdriver.Chrome,  competitor: Competitor):
@@ -14,7 +15,7 @@ class PdfHandler:
             # Wait for the page to load (optional, adjust as needed)
 
             currentDate = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
-            pdf_path = f"E:\\Users\\Echo\\Documents\\Python\\Competitors\\screenshots\\{competitor.name}_screenshot_{currentDate}.pdf"
+            pdf_path = f"{Arguments.PATH_SCREENSHOT}{competitor.name}_screenshot_{currentDate}.pdf"
 
             WebDriverWait(driver, 20).until(
                 lambda d: d.execute_script("return document.readyState") == "complete"

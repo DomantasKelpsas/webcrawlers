@@ -5,20 +5,17 @@ from Competitor import Competitor
 from PdfHandler import PdfHandler
 from GeminiModel import GeminiModel
 from CsvHandler import CsvHandler
-
-GEMINI_API_KEY = "AIzaSyCKhoUdsFUWxA0UrjTzMgE7ALbQQakSC1g"
+import Arguments
 
 def main():
     # Set up Chrome options
     chrome_options = Options()
     # chrome_options.add_argument("--headless")  # Run in headless mode
     # chrome_options.add_argument("--window-size=1920,1080")  # Set window size
-
-    # Specify the path to the ChromeDriver
-    driver_path = "E:\\Users\\Echo\\Documents\\Python\\chromedriver.exe"
+    
 
     # Initialize the WebDriver
-    service = Service(driver_path)
+    service = Service(Arguments.PATH_WEB_DRIVER)
     driver = webdriver.Chrome(service=service, options=chrome_options)
 
     try:
@@ -27,7 +24,7 @@ def main():
             # Competitor(name="revolut", url= "https://www.revolut.com/en-LT/news/")
         ]
 
-        geminiModel = GeminiModel.initGeminiModel(apiKey = GEMINI_API_KEY)
+        geminiModel = GeminiModel.initGeminiModel(apiKey = Arguments.GEMINI_API_KEY)
         
         # Open the target website
         for competitor in competitors:
