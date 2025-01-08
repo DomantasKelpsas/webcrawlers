@@ -1,19 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.chrome.service import Service
-from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
-from dataclasses import dataclass
-import datetime
-import time
-import csv
-import google.generativeai as genai
-import base64
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from Competitor import Competitor
 from PdfHandler import PdfHandler
 from GeminiModel import GeminiModel
 from CsvHandler import CsvHandler
+
+GEMINI_API_KEY = "AIzaSyCKhoUdsFUWxA0UrjTzMgE7ALbQQakSC1g"
 
 def main():
     # Set up Chrome options
@@ -34,16 +27,16 @@ def main():
             # Competitor(name="revolut", url= "https://www.revolut.com/en-LT/news/")
         ]
 
-        geminiModel = GeminiModel.initGeminiModel()
+        geminiModel = GeminiModel.initGeminiModel(apiKey = GEMINI_API_KEY)
         
         # Open the target website
         for competitor in competitors:
             driver.get(competitor.url)
 
             PdfHandler.save_webpage_as_pdf(driver, competitor)
-            # competitorData = scrapeText(driver)
-            # foramttedompetitorData = getGeminiQuery(model = geminiModel, competitorData = competitorData)
-            # writeToCSV(competitor.name, foramttedompetitorData)
+            competitorData = scrapeText(driver)
+            foramttedompetitorData = GeminiModel.getGeminiQuery(model = geminiModel, competitorData = competitorData)
+            CsvHandler.writeToCSV(competitor.name, foramttedompetitorData)
 
 
     finally:

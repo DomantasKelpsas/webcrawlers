@@ -1,3 +1,5 @@
+import csv
+
 class CsvHandler:
     def writeToCSV(competitorName: str, competitorData: str):
         csvfile = None  

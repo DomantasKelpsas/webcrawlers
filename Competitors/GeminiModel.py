@@ -1,8 +1,8 @@
 import google.generativeai as genai
 
 class GeminiModel:
-    def initGeminiModel():
-        genai.configure(api_key="AIzaSyCKhoUdsFUWxA0UrjTzMgE7ALbQQakSC1g")
+    def initGeminiModel(apiKey: str):
+        genai.configure(api_key=apiKey)
         return genai.GenerativeModel("gemini-1.5-flash")
 
     def getGeminiQuery(model: genai.GenerativeModel, competitorData: str):
