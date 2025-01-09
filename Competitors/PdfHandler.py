@@ -17,38 +17,6 @@ class PdfHandler:
             currentDate = datetime.datetime.now().strftime('%Y%m%dT%H%M%S')
             pdf_path = f"{Arguments.PATH_SCREENSHOT}{competitor.name}_screenshot_{currentDate}.pdf"
 
-            WebDriverWait(driver, 20).until(
-                lambda d: d.execute_script("return document.readyState") == "complete"
-            )
-
-        # Handle cookies popup
-            maxCookiesButtonReries = 3
-            cookiesButtonReries = 0
-
-            cookiesButtonRule = [
-                    "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
-                    "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]",
-                    "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
-                    "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]",
-                    "//div[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept') or "
-                    "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree')]"
-                    ]
-            
-            while cookiesButtonReries < maxCookiesButtonReries:
-                try:
-                    cookies_button = WebDriverWait(driver, 10).until(
-                        EC.element_to_be_clickable((By.XPATH, cookiesButtonRule[cookiesButtonReries]))
-                    )
-                    cookies_button.click()
-                    time.sleep(1)
-                    break
-                except Exception as e:
-                    cookiesButtonReries += 1
-                    print(f"Attempt {cookiesButtonReries}: Cookies button not found. Retrying... ({str(e)})")
-
-            # Scroll the page to ensure full rendering
-            driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
             pdf_base64 = driver.print_page()
 
             # Decode the Base64 content into binary data

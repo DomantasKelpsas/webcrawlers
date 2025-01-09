@@ -13,5 +13,5 @@ class GeminiModel:
         )
 
         response = model.generate_content(query)
-        print(response.text)
+        # print(response.text)
         return response.text
