@@ -11,8 +11,14 @@ class PageHandler:
         )
 
         # Handle cookies popup
-        maxCookiesButtonReries = 3
+        cookiesButtonTextList = ['accept', 'agree', 'allow']
+        cookiesButtonType = ['//button', '//a', '//div']
+
+        maxCookiesButtonReries = len(cookiesButtonType)
         cookiesButtonReries = 0
+        cookiesButtonRule2 = []
+
+       
 
         cookiesButtonRule = [
                 "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept ') or "
@@ -25,6 +31,13 @@ class PageHandler:
                 "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree ') or "
                 "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'allow ')]"
                 ]
+        
+        for buttonType in cookiesButtonType:
+            ruleRow = f'{buttonType}['
+            for buttonText in cookiesButtonTextList:
+                ruleRow += f'contains(translate(., \'ABCDEFGHIJKLMNOPQRSTUVWXYZ\', \'abcdefghijklmnopqrstuvwxyz\'), \'{buttonText} \') or '
+            ruleRow = ruleRow[:-4] + "]"
+            cookiesButtonRule2.append(ruleRow)
             
         while cookiesButtonReries < maxCookiesButtonReries:
             try:
@@ -34,7 +47,7 @@ class PageHandler:
                 cookies_button.click()
                 time.sleep(1)
                 break
-            except Exception as e:
+            except Exception:
                 cookiesButtonReries += 1
                 print(f"Attempt {cookiesButtonReries}: Cookies button not found. Retrying...")
 
