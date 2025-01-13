@@ -13,35 +13,22 @@ class PageHandler:
         # Handle cookies popup
         cookiesButtonTextList = ['accept', 'agree', 'allow']
         cookiesButtonType = ['//button', '//a', '//div']
+        ignoreCaseRule = "\'ABCDEFGHIJKLMNOPQRSTUVWXYZ\', \'abcdefghijklmnopqrstuvwxyz\'"
 
         maxCookiesButtonReries = len(cookiesButtonType)
         cookiesButtonReries = 0
-        cookiesButtonRule2 = []
-
-       
-
-        cookiesButtonRule = [
-                "//button[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'allow ')]",
-                "//a[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'allow ')]",
-                "//div[contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'accept ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'agree ') or "
-                "contains(translate(., 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', 'abcdefghijklmnopqrstuvwxyz'), 'allow ')]"
-                ]
+        cookiesButtonRule = []
         
         for buttonType in cookiesButtonType:
             ruleRow = f'{buttonType}['
             for buttonText in cookiesButtonTextList:
-                ruleRow += f'contains(translate(., \'ABCDEFGHIJKLMNOPQRSTUVWXYZ\', \'abcdefghijklmnopqrstuvwxyz\'), \'{buttonText} \') or '
+                ruleRow += f'contains(translate(., {ignoreCaseRule}), \'{buttonText} \') or translate(text(), {ignoreCaseRule})=\'{buttonText}\' or '
             ruleRow = ruleRow[:-4] + "]"
-            cookiesButtonRule2.append(ruleRow)
+            cookiesButtonRule.append(ruleRow)
             
         while cookiesButtonReries < maxCookiesButtonReries:
             try:
-                cookies_button = WebDriverWait(driver, 10).until(
+                cookies_button = WebDriverWait(driver, 1).until(
                     EC.element_to_be_clickable((By.XPATH, cookiesButtonRule[cookiesButtonReries]))
                 )
                 cookies_button.click()
