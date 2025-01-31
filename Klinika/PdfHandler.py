@@ -5,7 +5,7 @@ import time
 import base64
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-from Section import Section
+from Models import Section
 import Arguments
 
 class PdfHandler: 

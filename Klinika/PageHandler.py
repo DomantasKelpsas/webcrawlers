@@ -42,4 +42,4 @@ class PageHandler:
     def scrollToBottom(driver: webdriver.Chrome):
          # Scroll the page to ensure full rendering
         driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(10)
+        time.sleep(5)
