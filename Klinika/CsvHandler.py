@@ -1,7 +1,9 @@
 import csv
 import Arguments
 from Models import Doctor
-from Models import Price
+from Models import Service
+from Models import Procedure
+from Utils import Utils
 
 class CsvHandler:
     def writeDoctorsToCSV(sectionName: str, doctors: list[Doctor]):
@@ -23,19 +25,21 @@ class CsvHandler:
         finally:
             csvfile.close()
 
-    def writePricesToCSV(sectionName: str, prices: list[Price]):
+    def writePricesToCSV(sectionName: str, procedures: list[Procedure]):
         csvfile = None  
 
         try:
             csvfile = open(f'{Arguments.PATH_CSV}klinika_{sectionName}.csv', 'a',newline='',encoding='utf-8-sig')
             
             with csvfile:
-                fieldnames = ['Name', 'Price']
+                fieldnames = ['ProcedureName', 'ServiceName', 'Value1', 'Value2']
                 writer = csv.DictWriter(csvfile,fieldnames=fieldnames,)
-                # writer.writeheader()
-                for price in prices:
-                    writer.writerow({'Name':price.name, 'Price':price.value})                                 
-                        
+                for procedure in procedures:
+                    writer.writerow({'ProcedureName':procedure.name, 'ServiceName':"", 'Value1':"", 'Value2':""})
+                    writer.writerow({'ProcedureName':"", 'ServiceName':Utils.safe_get(procedure.serviceTitleFields,0), 'Value1':Utils.safe_get(procedure.serviceTitleFields,1), 'Value2':Utils.safe_get(procedure.serviceTitleFields,2)})                                 
+
+                    for service in procedure.services:
+                            writer.writerow({'ProcedureName':"", 'ServiceName':service.name, 'Value1':service.value1, 'Value2':service.value2})
         except Exception as e:
             print(e)
         

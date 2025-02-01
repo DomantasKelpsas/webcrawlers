@@ -1,6 +1,7 @@
 from selenium import webdriver
 from Models import Doctor
-from Models import Price
+from Models import Service
+from Models import Procedure
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -22,31 +23,57 @@ class TextScrapper:
     
     def scrapePrices(driver: webdriver):
         try:
-            dropdowns = WebDriverWait(driver, 10).until(
+            procedure_category_elements = WebDriverWait(driver, 10).until(
                 EC.presence_of_all_elements_located((By.XPATH, '//h3[contains(@class, "ui-accordion-header")]')))
             
-            for dropdown in dropdowns:
-                driver.execute_script("arguments[0].scrollIntoView(true);", dropdown)  # Scroll to element
-                dropdown.click()  # Click on the element
+            for procedure_category_element in procedure_category_elements:
+                driver.execute_script("arguments[0].scrollIntoView(true);", procedure_category_element)  # Scroll to element
+                procedure_category_element.click()  # Click on the element
 
             
-            prices = []
+            procedures: list[Procedure] = []
             procedures_elements = driver.find_elements(By.XPATH, '//span[contains(@class, "kainos_proceduros_pavadinimas_fsdaysdguas__pavadinimas")]')
 
+            testIterations = 2
+            iterations = 0
+           
             for procedure_element in procedures_elements:
-                procedure_element.click()
-                time.sleep(2)
-                procedureName = procedure_element.text
+                if(iterations < testIterations):
+                    procedure_element.click()
+                    time.sleep(1)
 
-                service_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "kainorastis-block__child") and contains(@class, "active")]//div[contains(@class, "kaina-line")]')
-                for service_element in service_elements:
-                    serviceName = service_element.find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]').text
-                    servicePrice = service_element.find_element(By.XPATH, './/div[contains(@class, "kaina-price-center")]').text
-                    price = Price(f'{procedureName} - {serviceName}', servicePrice)
-                    prices.append(price)
+                    services: list[Service] = []
+                    procedureName = procedure_element.text
 
-                print("Prices:", prices)
+                    service_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "kainorastis-block__child") and contains(@class, "active")]//div[contains(@class, "kaina-line")]')
+                    serviceTableTitleFields = [element.text.strip() for element in service_elements[0].find_elements(By.XPATH,'.//div[contains(@class, "table-first-line-ins")]')]
 
-            return prices
+                    # try:
+                    #     element = service_elements[0].find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]')
+                    #     text = element.text
+                    # except:
+                    #     text = ""
+                    
+                    # try:
+                    #     element = service_elements[0].find_element(By.XPATH, './/div[contains(@class, "kaina-price-center")]')
+                    #     text = element.text
+                    # except:
+                    #     text = ""
+
+
+                    for service_element in service_elements[1:]:
+                        serviceName = service_element.find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]').text.strip()
+                        servicePrice = service_element.find_element(By.XPATH, './/div[contains(@class, "kaina-price-center")]').text.strip()
+                        service = Service(serviceName, servicePrice, "")
+                        services.append(service)
+
+                    procedure = Procedure(procedureName, serviceTableTitleFields, services)
+                    procedures.append(procedure)
+
+                    print("Procedures:", procedures)
+                    iterations+=1
+                else:
+                    return procedures
+            return procedures
         except Exception as e:
             print(e)

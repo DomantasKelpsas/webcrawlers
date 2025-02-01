@@ -30,9 +30,6 @@ def main():
 
         savedSectionData = None
 
-        testIterations = 0
-        # Open the target website
-
         for section in sections:
             driver.get(section.url)
             PageHandler.handleCookies(driver)

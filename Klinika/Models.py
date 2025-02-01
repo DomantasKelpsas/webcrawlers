@@ -12,6 +12,18 @@ class Doctor:
     url: str
 
 @dataclass
-class Price:
+class Service:
     name: str
-    value: str
+    value1: str
+    value2: str
+
+@dataclass
+class Procedure:
+    name: str
+    serviceTitleFields: list[str]
+    services: list[Service]   
+
+@dataclass
+class ProcedureCategory:
+    name: str
+    subCategories: list[Procedure] 
