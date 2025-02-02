@@ -40,6 +40,7 @@ class CsvHandler:
 
                     for service in procedure.services:
                             writer.writerow({'ProcedureName':"", 'ServiceName':service.name, 'Value1':service.value1, 'Value2':service.value2})
+                    writer.writerow({'ProcedureName':"", 'ServiceName':"", 'Value1':"", 'Value2':""})       
         except Exception as e:
             print(e)
         

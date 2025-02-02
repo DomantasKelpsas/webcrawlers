@@ -6,6 +6,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+from Utils import Utils
 
 class TextScrapper:
     def scrapeDoctors(driver: webdriver):
@@ -38,42 +39,41 @@ class TextScrapper:
             iterations = 0
            
             for procedure_element in procedures_elements:
-                if(iterations < testIterations):
-                    procedure_element.click()
-                    time.sleep(1)
+                procedure_element.click()
+                time.sleep(1)
 
-                    services: list[Service] = []
-                    procedureName = procedure_element.text
+                services: list[Service] = []
+                procedureName = procedure_element.text
 
-                    service_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "kainorastis-block__child") and contains(@class, "active")]//div[contains(@class, "kaina-line")]')
-                    serviceTableTitleFields = [element.text.strip() for element in service_elements[0].find_elements(By.XPATH,'.//div[contains(@class, "table-first-line-ins")]')]
+                service_elements = driver.find_elements(By.XPATH, '//div[contains(@class, "kainorastis-block__child") and contains(@class, "active")]//div[contains(@class, "kaina-line")]')
+                serviceTableTitleFields = [element.text.strip() for element in service_elements[0].find_elements(By.XPATH,'.//div[contains(@class, "table-first-line-ins")]')]
 
-                    # try:
-                    #     element = service_elements[0].find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]')
-                    #     text = element.text
-                    # except:
-                    #     text = ""
-                    
-                    # try:
-                    #     element = service_elements[0].find_element(By.XPATH, './/div[contains(@class, "kaina-price-center")]')
-                    #     text = element.text
-                    # except:
-                    #     text = ""
+                for service_element in service_elements[1:]:
+                    serviceName = service_element.find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]').text.strip()
 
+                    servicePrice1Fields = service_element.find_element(By.XPATH, './/div[contains(@class, "table-second-line") and not(contains(@class, "second-add"))]//div[contains(@class, "kaina-price-center")]').text.strip().split("\n")
+                    servicePrice1 = servicePrice1Fields[0]
+                    serviceDiscount1 = Utils.safe_get(servicePrice1Fields,1)
+                    if serviceDiscount1:
+                        servicePrice1+=f' / {serviceDiscount1}*'
 
-                    for service_element in service_elements[1:]:
-                        serviceName = service_element.find_element(By.XPATH, './/div[contains(@class, "table-first-line-ins")]').text.strip()
-                        servicePrice = service_element.find_element(By.XPATH, './/div[contains(@class, "kaina-price-center")]').text.strip()
-                        service = Service(serviceName, servicePrice, "")
-                        services.append(service)
+                    try:
+                        servicePrice2Fields = service_element.find_element(By.XPATH, './/div[contains(@class, "table-second-line") and contains(@class, "second-add")]//div[contains(@class, "kaina-price-center")]').text.strip().split("\n")
+                        servicePrice2 = servicePrice2Fields[0]
+                        serviceDiscount2 = Utils.safe_get(servicePrice2Fields,1)
+                        if serviceDiscount2:
+                            servicePrice2+=f' / {serviceDiscount2}*'
+                    except:
+                        servicePrice2 = ""
 
-                    procedure = Procedure(procedureName, serviceTableTitleFields, services)
-                    procedures.append(procedure)
+                    service = Service(serviceName, servicePrice1, servicePrice2)
+                    services.append(service)
 
-                    print("Procedures:", procedures)
-                    iterations+=1
-                else:
-                    return procedures
+                procedure = Procedure(procedureName, serviceTableTitleFields, services)
+                procedures.append(procedure)
+
+                print("Procedures:", procedures)
+               
             return procedures
         except Exception as e:
             print(e)
