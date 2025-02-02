@@ -34,9 +34,6 @@ class TextScrapper:
             
             procedures: list[Procedure] = []
             procedures_elements = driver.find_elements(By.XPATH, '//span[contains(@class, "kainos_proceduros_pavadinimas_fsdaysdguas__pavadinimas")]')
-
-            testIterations = 2
-            iterations = 0
            
             for procedure_element in procedures_elements:
                 procedure_element.click()
@@ -57,23 +54,24 @@ class TextScrapper:
                     if serviceDiscount1:
                         servicePrice1+=f' / {serviceDiscount1}*'
 
-                    try:
-                        servicePrice2Fields = service_element.find_element(By.XPATH, './/div[contains(@class, "table-second-line") and contains(@class, "second-add")]//div[contains(@class, "kaina-price-center")]').text.strip().split("\n")
-                        servicePrice2 = servicePrice2Fields[0]
-                        serviceDiscount2 = Utils.safe_get(servicePrice2Fields,1)
-                        if serviceDiscount2:
-                            servicePrice2+=f' / {serviceDiscount2}*'
-                    except:
-                        servicePrice2 = ""
+                    serviceAdditionalColumnElements = service_element.find_elements(By.XPATH, './/div[contains(@class, "table-second-line") and contains(@class, "second-add")]//div[contains(@class, "kaina-price-center")]')
+                    serviceAdditionalColumnValues = []
+                    for serviceAdditionalColumnElement in serviceAdditionalColumnElements:
+                        try:                       
+                            servicePriceFields = serviceAdditionalColumnElement.text.strip().split("\n")
+                            servicePrice = servicePriceFields[0]
+                            serviceDiscount = Utils.safe_get(servicePriceFields,1)
+                            if serviceDiscount:
+                                servicePrice+=f' / {serviceDiscount}*'
+                        except:
+                            servicePrice = ""
+                        serviceAdditionalColumnValues.append(servicePrice)
 
-                    service = Service(serviceName, servicePrice1, servicePrice2)
+                    service = Service(serviceName, servicePrice1, serviceAdditionalColumnValues)
                     services.append(service)
 
                 procedure = Procedure(procedureName, serviceTableTitleFields, services)
                 procedures.append(procedure)
-
-                print("Procedures:", procedures)
-               
             return procedures
         except Exception as e:
             print(e)

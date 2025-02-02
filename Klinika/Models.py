@@ -14,8 +14,8 @@ class Doctor:
 @dataclass
 class Service:
     name: str
-    value1: str
-    value2: str
+    value: str
+    additionalValues: list[str]
 
 @dataclass
 class Procedure:
