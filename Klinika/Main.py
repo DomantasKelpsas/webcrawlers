@@ -23,7 +23,7 @@ def main():
 
     try:
         sections = [
-            # Section(name="Doctors", url= "https://lazerineklinika.lt/gydytojai/"),
+            Section(name="Doctors", url= "https://lazerineklinika.lt/gydytojai/"),
             Section(name="Prices", url= "https://lazerineklinika.lt/kainos/"),
             
         ]
