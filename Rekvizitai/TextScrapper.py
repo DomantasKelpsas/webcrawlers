@@ -45,6 +45,14 @@ class TextScrapper:
             print(f"Error: {e}")
         finally:
             return extracted_text.strip()
+        
+    def getMaxPage(driver: webdriver.Chrome) -> int:
+        maxPage = 1
+        pagingItems = Utils.safeGetElements(driver,'.//ul[@class="pagination"]/li[@class="page-item numbers"]')
+        try:
+            maxPage = Utils.getIntFromText(pagingItems[-1].text)
+        finally:
+            return maxPage
 
     def scrapeCompany(mainDriver: webdriver.Chrome, section: Section) -> list[Company]:
         chrome_options = Options()
@@ -54,12 +62,14 @@ class TextScrapper:
         rekvizitaiData:list[Company] = []
 
         try:
-            for pageNumber in range(1):   
+            mainDriver.get(section.url)
+            PageHandler.handleCookies(mainDriver)
+            maxPage = TextScrapper.getMaxPage(mainDriver)
+            
+            for pageNumber in range(maxPage):   
                 mainDriver.get(section.url + str(pageNumber + 1))
                 PageHandler.scrollToBottom(mainDriver)
-                if pageNumber == 0:
-                    PageHandler.handleCookies(mainDriver)
-
+             
                 companies = mainDriver.find_elements(By.XPATH, '//div[contains(@class, "company")]//div[contains(concat(" ", normalize-space(@class), " "), " company-info ")]')
                 for company in companies:
                     try:

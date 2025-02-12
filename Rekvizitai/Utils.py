@@ -35,6 +35,12 @@ class Utils:
         except Exception:
             return None
         
+    def safeGetElements(driver: webdriver.Chrome, query: str) -> list[WebElement]:
+        try:
+            return driver.find_elements(By.XPATH, query)
+        except Exception:
+            return []
+        
     def getWordsFromText(text: str) -> list[str]:
         words = [""]
         try:
