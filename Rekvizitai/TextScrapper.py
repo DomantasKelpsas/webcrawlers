@@ -119,8 +119,20 @@ class TextScrapper:
                             revenue = Utils.getFloatFromText(revenueElement.text)
                         else:
                             revenue = float(0)
+                            
+                        profitElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Grynasis pelnas")]]/td[contains(@class,"value")]')
+                        if(profitElement):
+                            profit = Utils.getFloatFromText(profitElement.text)
+                        else:
+                            profit = float(0)
+                            
+                        companyAgeElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Įmonės amžius")]]/td[contains(@class,"value")]')
+                        if(companyAgeElement):
+                            companyAge = companyAgeElement.text
+                        else:
+                            companyAge = ""
 
-                        companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, director, companyPage)
+                        companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, profit, director, companyPage, companyAge)
                         rekvizitaiData.append(companyData)
                     except Exception as e:
                         print(e)

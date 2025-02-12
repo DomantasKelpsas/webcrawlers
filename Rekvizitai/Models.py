@@ -14,6 +14,8 @@ class Company:
     phoneNumber3: str
     employeeCount: int
     revenue: float
+    profit: float
     director: str
     companyPage: str
+    companyAge: str
 
