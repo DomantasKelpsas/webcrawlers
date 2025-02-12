@@ -12,11 +12,14 @@ class CsvHandler:
             csvfile = open(f'{Arguments.PATH_CSV}Rekvizitai_{sectionName}.csv', 'a',newline='',encoding='utf-8-sig')
             
             with csvfile:
-                fieldnames = ['CompanyName', 'phoneNumber', 'employeeCount', 'revenue']
+                fieldnames = ['CompanyName', 'phoneNumber1', 'phoneNumber2', 'phoneNumber3', 'employeeCount', 'revenue']
                 writer = csv.DictWriter(csvfile,fieldnames=fieldnames,)
                 # writer.writeheader()
                 for company in rekvizitai:
-                    writer.writerow({'CompanyName':company.name, 'phoneNumber':company.phoneNumber, 'employeeCount':company.employeeCount, 'revenue':company.revenue})                                 
+                    writer.writerow({'CompanyName':company.name,
+                                     'phoneNumber1':company.phoneNumber1, 'phoneNumber2':company.phoneNumber2, 'phoneNumbe3':company.phoneNumber3,
+                                     'employeeCount':company.employeeCount,
+                                     'revenue':company.revenue})                                 
                         
         except Exception as e:
             print(e)

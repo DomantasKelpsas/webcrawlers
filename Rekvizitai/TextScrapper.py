@@ -70,9 +70,21 @@ class TextScrapper:
                         
                         phoneNumberElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Mobilus telefonas")]]/td[contains(@class,"value")]/img')
                         if(phoneNumberElement):
-                            phoneNumber = TextScrapper.imageScrapper(phoneNumberElement.get_attribute("src"))
+                            phoneNumber1 = TextScrapper.imageScrapper(phoneNumberElement.get_attribute("src"))
                         else:
-                            phoneNumber = ""
+                            phoneNumber1 = ""
+                            
+                        phoneNumberElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Telefonas")]]/td[contains(@class,"value")]/img')
+                        if(phoneNumberElement):
+                            phoneNumber2 = TextScrapper.imageScrapper(phoneNumberElement.get_attribute("src"))
+                        else:
+                            phoneNumber2 = ""
+                            
+                        phoneNumberElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Buhalterijos telefonas")]]/td[contains(@class,"value")]/img')
+                        if(phoneNumberElement):
+                            phoneNumber3 = TextScrapper.imageScrapper(phoneNumberElement.get_attribute("src"))
+                        else:
+                            phoneNumber3 = ""
 
                         employeeCountElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Darbuotojai")]]/td[contains(@class,"value")]')
                         if(employeeCountElement):
@@ -86,11 +98,12 @@ class TextScrapper:
                         else:
                             revenue = float(0)
 
-                        companyData = Company(companyName, phoneNumber, employeeCount, revenue)
+                        companyData = Company(companyName, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue)
                         rekvizitaiData.append(companyData)
                     except Exception as e:
                         print(e)
         except Exception as e:
             print(e)
         finally:
+            itemDriver.quit()
             return rekvizitaiData
