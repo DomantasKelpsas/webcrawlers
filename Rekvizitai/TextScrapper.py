@@ -68,6 +68,28 @@ class TextScrapper:
                         companyUrl = titleElement.get_attribute("href")
                         itemDriver.get(companyUrl)
                         
+                        directorElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Vadovas")]]/td[contains(@class,"value")]')
+                        if(directorElement):
+                            directorStringWords = Utils.getWordsFromText(directorElement.text)
+                            if len(directorStringWords) >= 2:
+                                director = f'{directorStringWords[0]} {directorStringWords[1]}'
+                            else:
+                                director = ""
+                        else:
+                            director = ""
+                            
+                        addressElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Adresas")]]/td[contains(@class,"value")]')
+                        if(addressElement):
+                            address = addressElement.text
+                        else:
+                            address = ""
+                            
+                        companyPageElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Tinklalapis")]]/td[contains(@class,"value")]/a')
+                        if(companyPageElement):
+                            companyPage = companyPageElement.text
+                        else:
+                            companyPage = ""
+                        
                         phoneNumberElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Mobilus telefonas")]]/td[contains(@class,"value")]/img')
                         if(phoneNumberElement):
                             phoneNumber1 = TextScrapper.imageScrapper(phoneNumberElement.get_attribute("src"))
@@ -98,7 +120,7 @@ class TextScrapper:
                         else:
                             revenue = float(0)
 
-                        companyData = Company(companyName, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue)
+                        companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, director, companyPage)
                         rekvizitaiData.append(companyData)
                     except Exception as e:
                         print(e)

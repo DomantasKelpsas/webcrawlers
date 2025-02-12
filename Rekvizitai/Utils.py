@@ -34,3 +34,10 @@ class Utils:
             return driver.find_element(By.XPATH, query)
         except Exception:
             return None
+        
+    def getWordsFromText(text: str) -> list[str]:
+        words = [""]
+        try:
+            words = re.split(r'[ ,!\n]+', text)
+        finally:
+            return words
