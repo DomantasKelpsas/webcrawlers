@@ -10,6 +10,7 @@ from PageHandler import PageHandler
 from selenium.webdriver.chrome.service import Service
 from selenium.webdriver.chrome.options import Options
 import Arguments
+import Network
 import requests
 from PIL import Image
 import pytesseract
@@ -17,6 +18,7 @@ from io import BytesIO
 import cv2
 import re
 import numpy as np
+import random
 
 class TextScrapper:
     def imageScrapper(imageUrl):
@@ -55,10 +57,8 @@ class TextScrapper:
             return maxPage
 
     def scrapeCompany(mainDriver: webdriver.Chrome, section: Section) -> list[Company]:
-        chrome_options = Options()
         service = Service(Arguments.PATH_WEB_DRIVER)
-        itemDriver = webdriver.Chrome(service=service, options=chrome_options)
-
+        itemDriver = None
         rekvizitaiData:list[Company] = []
 
         try:
@@ -69,6 +69,11 @@ class TextScrapper:
             for pageNumber in range(maxPage):   
                 mainDriver.get(section.url + str(pageNumber + 1))
                 PageHandler.scrollToBottom(mainDriver)
+                
+                if pageNumber % 5 == 0:
+                    if itemDriver:
+                        itemDriver.close()
+                    itemDriver = Network.getRandomWebDriver(service)
              
                 companies = mainDriver.find_elements(By.XPATH, '//div[contains(@class, "company")]//div[contains(concat(" ", normalize-space(@class), " "), " company-info ")]')
                 for company in companies:
@@ -76,6 +81,7 @@ class TextScrapper:
                         titleElement = company.find_element(By.XPATH, './/a[contains(@class, "company-title")]')
                         companyName = titleElement.text
                         companyUrl = titleElement.get_attribute("href")
+                        time.sleep(random.uniform(1, 25))
                         itemDriver.get(companyUrl)
                         
                         directorElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Vadovas")]]/td[contains(@class,"value")]')
