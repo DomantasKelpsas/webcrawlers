@@ -19,6 +19,8 @@ import cv2
 import re
 import numpy as np
 import random
+from GeminiModel import GeminiModel
+import google.generativeai as genai
 
 class TextScrapper:
     def imageScrapper(imageUrl):
@@ -59,8 +61,12 @@ class TextScrapper:
     def scrapeCompanyAboutPage(driver: webdriver.Chrome, url:str):
         driver.get(url)
         time.sleep(2)
+        
+    def parseCompanyDetails(geminiModel: genai.GenerativeModel, companyDetails: str):
+        GeminiModel.getGeminiQuery(geminiModel, companyDetails)
 
     def scrapeCompany(mainDriver: webdriver.Chrome, section: Section) -> list[Company]:
+        geminiModel = GeminiModel.initGeminiModel(apiKey = Arguments.GEMINI_API_KEY)
         service = Service(Arguments.PATH_WEB_DRIVER)
         itemDriver = None
         itemAboutPageDriver = Network.getDefaultWebDriver()
@@ -159,8 +165,10 @@ class TextScrapper:
                         else:
                             companyDescription = ""
                             
-                        if companyPage: 
-                            TextScrapper.scrapeCompanyAboutPage(itemAboutPageDriver, companyPage)
+                        # if companyPage: 
+                        #     TextScrapper.scrapeCompanyAboutPage(itemAboutPageDriver, companyPage)
+                        
+                        companyDescription = TextScrapper.parseCompanyDetails(geminiModel, companyDescription)
 
                         companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, profit, director, companyPage, companyAge, companyDescription)
                         rekvizitaiData.append(companyData)
