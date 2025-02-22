@@ -18,4 +18,5 @@ class Company:
     director: str
     companyPage: str
     companyAge: str
+    companyDescription: str
 

@@ -55,10 +55,15 @@ class TextScrapper:
             maxPage = Utils.getIntFromText(pagingItems[-1].text)
         finally:
             return maxPage
+        
+    def scrapeCompanyAboutPage(driver: webdriver.Chrome, url:str):
+        driver.get(url)
+        time.sleep(2)
 
     def scrapeCompany(mainDriver: webdriver.Chrome, section: Section) -> list[Company]:
         service = Service(Arguments.PATH_WEB_DRIVER)
         itemDriver = None
+        itemAboutPageDriver = Network.getDefaultWebDriver()
         rekvizitaiData:list[Company] = []
 
         try:
@@ -81,7 +86,7 @@ class TextScrapper:
                         titleElement = company.find_element(By.XPATH, './/a[contains(@class, "company-title")]')
                         companyName = titleElement.text
                         companyUrl = titleElement.get_attribute("href")
-                        time.sleep(random.uniform(1, 25))
+                        time.sleep(random.uniform(1, 5))
                         itemDriver.get(companyUrl)
                         
                         directorElement = Utils.safeGetElement(itemDriver,'//tr[td[@class="name" and contains(text(), "Vadovas")]]/td[contains(@class,"value")]')
@@ -147,8 +152,17 @@ class TextScrapper:
                             companyAge = companyAgeElement.text
                         else:
                             companyAge = ""
+                            
+                        companyDescriptionElement = Utils.safeGetElement(itemDriver,'//div[@class="block companyDescription"]/div[@class="description"]')
+                        if(companyDescriptionElement):
+                            companyDescription = companyDescriptionElement.text
+                        else:
+                            companyDescription = ""
+                            
+                        if companyPage: 
+                            TextScrapper.scrapeCompanyAboutPage(itemAboutPageDriver, companyPage)
 
-                        companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, profit, director, companyPage, companyAge)
+                        companyData = Company(companyName, address, phoneNumber1, phoneNumber2, phoneNumber3, employeeCount, revenue, profit, director, companyPage, companyAge, companyDescription)
                         rekvizitaiData.append(companyData)
                     except Exception as e:
                         print(e)

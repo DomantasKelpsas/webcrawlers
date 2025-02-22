@@ -6,18 +6,17 @@ from CsvHandler import CsvHandler
 from PageHandler import PageHandler
 from TextScrapper import TextScrapper
 import Arguments
-import time
+import Network
 
 def main():
     # Set up Chrome options
-    chrome_options = Options()
     # chrome_options.add_argument("--headless")  # Run in headless mode
     # chrome_options.add_argument("--window-size=1920,1080")  # Set window size
     
 
     # Initialize the WebDriver
     service = Service(Arguments.PATH_WEB_DRIVER)
-    driver = webdriver.Chrome(service=service, options=chrome_options)
+    driver = Network.getRandomWebDriver(service)
 
     try:
         sections = [
